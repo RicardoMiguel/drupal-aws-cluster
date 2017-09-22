@@ -1,0 +1,27 @@
+- name: Add user to docker group
+  user:
+    name: "{{ ansible_ssh_user }}"
+    groups: docker
+    append: yes
+
+- name: Ensure Docker is started and enabled at boot.
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Ensure user can use docker machine by restarting
+  shell: shutdown -r now
+
+# Tried unsuccessfully. Manual wait followed
+#- name: Wait for server to come back alive
+#  wait_for:
+#    host: "{{ ansible_ssh_host }}"
+#    delay: 60
+#    port: 22
+#    timeout: 320
+#    state: started
+
+- name: Wait for server to come back alive
+  pause:
+    seconds: 60

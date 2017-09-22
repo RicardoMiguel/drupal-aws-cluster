@@ -1,0 +1,9 @@
+---
+  - hosts: tag_Name_drupal_ec2_placeholder
+    become: true
+    roles:
+      - basic
+    tasks:
+      - name: Set timezone to Europe/London
+        timezone:
+          name: Europe/London

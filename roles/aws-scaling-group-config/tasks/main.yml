@@ -1,0 +1,21 @@
+- ec2_vpc_subnet_facts:
+    filters:
+      vpc-id: "{{ aws.vpc }}"
+  register: subnet_facts
+
+- name: Provisioning Auto Scaling Group
+  ec2_asg:
+    name: "{{ aws.scalingGroupName }}"
+    state: present
+    default_cooldown: 300
+    health_check_period: 300
+    health_check_type: EC2
+    launch_config_name: "{{ aws.launchConfigurationName }}"
+    load_balancers: "{{ aws.loadBalancerName }}"
+    desired_capacity: "{{ aws.scalingGroupMinInstances }}"
+    min_size: "{{ aws.scalingGroupMinInstances }}"
+    max_size: "{{ aws.scalingGroupMaxInstances }}"
+    tags:
+      - Name: "{{ aws.scalingGroupName }}"
+    vpc_zone_identifier: "{{ subnet_facts.subnets|map(attribute='id')|list }}"
+    wait_for_instances: False

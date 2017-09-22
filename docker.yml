@@ -1,0 +1,5 @@
+---
+  - hosts: tag_Name_drupal_ec2_placeholder
+    become: true
+    roles:
+      - docker-config

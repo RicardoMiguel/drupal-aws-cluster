@@ -1,0 +1,35 @@
+- name: Provisioning EC2 Instances Security Group
+  ec2_group:
+    name: "{{ aws.ec2SecurityGroup }}"
+    description: Security Group for drupal EC2 instances
+    vpc_id: "{{ aws.vpc }}"
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+
+- ec2_group_facts:
+    filters:
+      vpc-id: "{{ aws.vpc }}"
+      group-name: "{{ aws.ec2SecurityGroup }}"
+  register: ec2_security_group
+
+- name: Provisioning RDS Security Group
+  ec2_group:
+    name: "{{ aws.rdsSecurityGroup }}"
+    description: Security Group for drupal RDS
+    vpc_id: "{{ aws.vpc }}"
+    rules:
+      - proto: tcp
+        from_port: "{{ db.port }}"
+        to_port: "{{ db.port }}"
+        cidr_ip: "{{ myIp }}/32"
+      - proto: tcp
+        from_port: "{{ db.port }}"
+        to_port: "{{ db.port }}"
+        group_id: "{{ ec2_security_group.security_groups[0].group_id }}"

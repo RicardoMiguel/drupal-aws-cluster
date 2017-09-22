@@ -1,0 +1,10 @@
+---
+- include: aws-security-groups.yml
+- include: aws-rds.yml
+- include: aws-ec2.yml
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+    - meta: refresh_inventory
+- include: server-drupal.yml

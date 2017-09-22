@@ -1,0 +1,44 @@
+---
+- name: Provisioning Load Balancer Security Group
+  ec2_group:
+    name: "{{ aws.elbSecurityGroup }}"
+    description: Security Group for drupal Load Balancer
+    vpc_id: "{{ aws.vpc }}"
+    rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+
+- ec2_vpc_subnet_facts:
+    filters:
+      vpc-id: "{{ aws.vpc }}"
+  register: subnet_facts
+
+- name: Provisioning Load Balancer
+  ec2_elb_lb:
+    state: present
+    name: "{{ aws.loadBalancerName }}"
+    connection_draining_timeout: 300
+    cross_az_load_balancing: yes
+    health_check:
+      ping_protocol: http
+      ping_port: 80
+      ping_path: "/"
+      response_timeout: 5 # seconds
+      interval: 30 # seconds
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    idle_timeout: 60 # 1 minute
+    security_group_names:
+      - "{{ aws.elbSecurityGroup }}"
+    subnets: "{{ subnet_facts.subnets|map(attribute='id')|list }}"
+    listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_protocol: http
+        instance_port: 80
+    tags:
+      Name: "{{ aws.loadBalancerName }}"
+    wait: yes
+    wait_timeout: 60

@@ -1,0 +1,4 @@
+---
+- include: basic.yml
+- include: docker.yml
+- include: drupal.yml

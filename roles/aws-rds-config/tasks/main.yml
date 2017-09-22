@@ -1,0 +1,25 @@
+- ec2_group_facts:
+    filters:
+      vpc-id: "{{ aws.vpc }}"
+      group-name: "{{ aws.rdsSecurityGroup }}"
+  register: rds_security_group
+
+- name: Create RDS MySQL
+  rds:
+    command: create
+    instance_name: "{{ db.instanceName }}"
+    db_engine: MySQL
+    engine_version: 5.6.35
+    license_model: general-public-license
+    size: 5
+    instance_type: db.t2.micro
+    multi_zone: no
+    vpc_security_groups: "{{ rds_security_group.security_groups[0].group_id }}"
+    username: "{{ db.username }}"
+    password: "{{ db.password }}"
+    port: "{{ db.port }}"
+    db_name: "{{ db.name }}"
+    tags:
+      Name: "{{ db.instanceName }}"
+    wait: true
+    wait_timeout: 900 # 15 minutes

@@ -1,0 +1,35 @@
+---
+drupal:
+  hashSalt: "{{ lookup('ini', 'hashSaltForDrupalInstance type=properties file=sensitive-data/data.ini') }}"
+
+db:
+  instanceName: drupal-rds
+  username: "{{ lookup('ini', 'masterUserForRds type=properties file=sensitive-data/data.ini') }}"
+  password: "{{ lookup('password', 'sensitive-data/db_password.txt') }}"
+  port: 3306
+  name: drupaldb
+
+aws:
+  vpc: "{{ lookup('ini', 'awsVpcId type=properties file=sensitive-data/data.ini') }}"
+  # Security Groups
+  ec2SecurityGroup: drupal-ec2-instances-group
+  rdsSecurityGroup: drupal-rds-group
+  elbSecurityGroup: drupal-elb-security-group
+  # EC2 Configs
+  ec2Tag: drupal-ec2-placeholder
+  keyPairName: "{{ lookup('ini', 'awsMyKeyPairName type=properties file=sensitive-data/data.ini') }}"
+  # AMI Configs
+  amiName: drupal-ami
+  amiArchitecture: x86_64
+  amiVirtualizationType: hvm
+  amiRootDeviceName: /dev/xvda
+  # Launch Configuration
+  launchConfigurationName: drupal-launch-configuration
+  # Load Balancer
+  loadBalancerName: drupal-elb
+  # Auto Scaling Group Configs
+  scalingGroupName: drupal-asg
+  scalingGroupMinInstances: 2
+  scalingGroupMaxInstances: 3
+
+myIp: "{{ lookup('ini', 'myIpForSecurityGroup type=properties file=sensitive-data/data.ini') }}"

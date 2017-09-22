@@ -1,0 +1,5 @@
+---
+- include: aws-ami.yml
+- include: aws-load-balancer.yml
+- include: aws-launch-configuration.yml
+- include: aws-scaling-group.yml

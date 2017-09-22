@@ -1,0 +1,23 @@
+- ec2_remote_facts:
+    filters:
+      vpc-id: "{{ aws.vpc }}"
+      instance-state-name: running
+      "tag:Name": "{{ aws.ec2Tag }}"
+  register: ec2_tag
+
+- name: Provisioning AMI from instance
+  ec2_ami:
+    name: "{{ aws.amiName }}"
+    description: A Drupal AMI for scaling instances
+    state: present
+    instance_id: "{{ ec2_tag.instances[0].id }}"
+    architecture: "{{ aws.amiArchitecture }}"
+    virtualization_type: "{{ aws.amiVirtualizationType }}"
+    root_device_name: "{{ aws.amiRootDeviceName }}"
+    device_mapping:
+      - device_name: "{{ aws.amiRootDeviceName }}"
+        size: 8
+        delete_on_termination: true
+        volume_type: gp2
+    wait: yes
+    wait_timeout: 300 # 5 minutes

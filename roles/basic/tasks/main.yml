@@ -1,0 +1,17 @@
+- name: Install Python 2
+  raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+
+- name: Install Modules
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - vim
+    - docker
+
+- name: Install Modules with pip
+  pip:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - docker-py

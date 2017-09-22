@@ -1,0 +1,35 @@
+# Assure Drupal EC2 Instance Idempotency
+- ec2_remote_facts:
+    filters:
+      vpc-id: "{{ aws.vpc }}"
+      instance-state-name: running
+      "tag:Name": "{{ aws.ec2Tag }}"
+  register: ec2_tag
+
+- name: Provisioning EC2 instance
+  ec2:
+    image: ami-ebd02392
+    instance_type: t2.micro
+    count: 1
+    group: "{{ aws.ec2SecurityGroup }}"
+    key_name: "{{ aws.keyPairName }}"
+    instance_tags:
+      Name: "{{ aws.ec2Tag }}"
+    volumes:
+      - device_name: /dev/xvda
+        volume_type: gp2
+        volume_size: 8
+        delete_on_termination: true
+    wait: yes
+  when: ec2_tag.instances[0] is undefined # or ec2_tag.instances[0].public_ip_address == ''
+  register: ec2
+
+- name: Wait for SSH to come up
+  wait_for:
+    host: "{{ item.public_ip }}"
+    port: 22
+    delay: 60
+    timeout: 320
+    state: started
+  with_items: "{{ ec2.instances }}"
+  when: ec2.skipped is undefined

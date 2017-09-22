@@ -1,0 +1,27 @@
+- ec2_ami_find:
+    name: "{{ aws.amiName }}"
+    state: available
+    architecture: "{{ aws.amiArchitecture }}"
+    hypervisor: xen
+    is_public: no
+  register: ami
+
+- ec2_group_facts:
+    filters:
+      vpc-id: "{{ aws.vpc }}"
+      group-name: "{{ aws.ec2SecurityGroup }}"
+  register: ec2_security_group
+
+- name: Provisioning Launch Configuration
+  ec2_lc:
+    name: "{{ aws.launchConfigurationName }}"
+    image_id: "{{ ami.results[0].ami_id }}"
+    key_name: "{{ aws.keyPairName }}"
+    security_groups:
+      - "{{ ec2_security_group.security_groups[0].group_id }}"
+    instance_type: t2.micro
+    volumes:
+      - device_name: /dev/xvda
+        volume_type: gp2
+        volume_size: 8
+        delete_on_termination: true

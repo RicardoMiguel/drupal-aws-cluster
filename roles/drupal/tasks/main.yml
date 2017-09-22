@@ -1,0 +1,19 @@
+- name: Download Drupal Docker image
+  docker_image:
+    name: ricardosoares/drupal-ec2:latest
+
+- name: Ensure Drupal Container is started
+  docker_container:
+    image: ricardosoares/drupal-ec2:latest
+    name: drupal-container
+    state: started
+    restart_policy: unless-stopped
+    ports:
+      - "80:80"
+    env:
+      HASH_SALT: "{{ drupal.hashSalt }}"
+      DB_NAME: "{{ db.name }}"
+      DB_USERNAME: "{{ db.username }}"
+      DB_PASSWORD: "{{ db.password }}"
+      DB_HOSTNAME: "{{ hostvars[groups[db.instanceName][0]].ansible_host }}"
+      DB_PORT: "{{ db.port }}"
